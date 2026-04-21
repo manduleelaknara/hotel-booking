@@ -4,17 +4,15 @@ import { Webhook } from "svix";
 const clerkWebhooks = async (req, res)=>{
     try {
         const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRECT)
-        // Getting Headers
         const headers = {
             "svix-id": req.headers["svix-id"],
             "svix-timestamp": req.headers["svix-timestamp"],
             "svix-signature": req.headers["svix-signature"],
         };
-        // Verfying Headers
-        await whook.verify(JSON.stringify(req.body), headers)
+        await whook.verify(req.body, headers)
 
-        // Getting Data from request body
-        const {data, type} = req.body
+        const payload = JSON.parse(req.body)
+        const {data, type} = payload
 
         const userData = {
             _id: data.id,
@@ -23,7 +21,6 @@ const clerkWebhooks = async (req, res)=>{
             image: data.image_url,
         }
 
-        // Switch Cases for different Events
         switch (type) {
             case "user.created":{
                 await User.create(userData);
@@ -37,7 +34,6 @@ const clerkWebhooks = async (req, res)=>{
                 await User.findByIdAndDelete(data.id);
                 break;
             }
-        
             default:
                 break;
         }
