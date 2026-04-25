@@ -1,10 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import toast from "react-hot-toast"; 
 import Title from "../components/Title";
-import { assets, userBookingsDummyData } from "../assets/assets";
+import { assets } from "../assets/assets";
+import { useAppContext } from "../context/AppContext";
 
 const MyBookings = () => {
 
-    const [bookings, setBookings] = useState(userBookingsDummyData)
+    const { axios, getToken, user, backendUrl } = useAppContext() 
+    const [bookings, setBookings] = useState([])
+
+    const fetchUserBookings = async () => {
+        try {
+            const { data } = await axios.get('/api/bookings/user', {headers: {
+            Authorization: `Bearer ${await getToken()}`}})
+            if (data.success){
+                setBookings(data.bookings)
+            }else{
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
+    }
+
+    useEffect(()=>{
+        if (user){
+            fetchUserBookings()
+        }
+    },[user])
 
     return (
         <div className='py-28 md:pb-35 md:pt-32 px-4 md:px-16 lg:px-24 xl:px-32'>
@@ -29,7 +52,7 @@ const MyBookings = () => {
                         {/* ------ Hotel Details ---- */}
                         <div className='flex flex-col md:flex-row'>
                             <img
-                                src={booking.room.images[0]}
+                                src={`${backendUrl}${booking.room.images[0]}`} // ✅ backendUrl added
                                 alt="hotel-img"
                                 className='w-44 rounded shadow object-cover'
                             />
@@ -46,7 +69,7 @@ const MyBookings = () => {
                                     <img src={assets.guestsIcon} alt="guests-icon" />
                                     <span>Guests: {booking.guests}</span>
                                 </div>
-                                <p className='text-base'>Total: ${booking.totalPrice}</p>
+                                <p className='text-base'>Total: Rs.{booking.totalPrice}</p>
                             </div>
                         </div>
 
@@ -65,9 +88,7 @@ const MyBookings = () => {
                         {/* ------- Payment Status ---- */}
                         <div className='flex flex-col items-start justify-center pt-3 gap-2'>
                             <div className='flex items-center gap-2'>
-                               
                                 <div className={`h-3 w-3 rounded-full ${booking.isPaid ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                
                                 <p className={`text-sm ${booking.isPaid ? 'text-green-500' : 'text-red-500'}`}>
                                     {booking.isPaid ? 'Paid' : 'Unpaid'}
                                 </p>
