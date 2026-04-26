@@ -23,6 +23,22 @@ const MyBookings = () => {
         }
     }
 
+    const handlePayment = async (bookingId) => {
+        try {
+            const { data } = await axios.post('/api/bookings/stripe-payment', 
+            {bookingId}, {headers: { Authorization: `Bearer ${await getToken()}` }})
+            if (data.success) {
+                window.location.href = data.url
+            }else{
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+            
+        }
+        
+    }
+
     useEffect(()=>{
         if (user){
             fetchUserBookings()
@@ -52,7 +68,7 @@ const MyBookings = () => {
                         {/* ------ Hotel Details ---- */}
                         <div className='flex flex-col md:flex-row'>
                             <img
-                                src={`${backendUrl}${booking.room.images[0]}`} // ✅ backendUrl added
+                                src={`${backendUrl}${booking.room.images[0]}`} 
                                 alt="hotel-img"
                                 className='w-44 rounded shadow object-cover'
                             />
@@ -94,7 +110,7 @@ const MyBookings = () => {
                                 </p>
                             </div>
                             {!booking.isPaid && (
-                                <button className='text-sm px-4 py-1.5 border border-gray-300 rounded hover:bg-gray-50 transition-all cursor-pointer'>
+                                <button onClick={()=>handlePayment(booking._id)} className='text-sm px-4 py-1.5 border border-gray-300 rounded hover:bg-gray-50 transition-all cursor-pointer'>
                                     Pay Now
                                 </button>
                             )}
