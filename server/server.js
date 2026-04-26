@@ -10,6 +10,7 @@ import userRouter from "./routes/userRoutes.js";
 import hotelRouter from "./routes/hotelRoutes.js";
 import roomRouter from "./routes/roomRoutes.js";
 import bookingRouter from "./routes/bookingRoutes.js";
+import { stripeWebhooks } from "./controllers/stripeWebhooks.js";
  
 connectDB();
  
@@ -22,6 +23,9 @@ app.use(cors({
     origin: "*",
     credentials: false
 }));
+
+// API to listen to Stripe Webhooks
+app.post('/api/stripe', express.raw({type: "application/json"}), stripeWebhooks)
  
 app.use(clerkMiddleware());
  
