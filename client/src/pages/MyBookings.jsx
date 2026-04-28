@@ -34,14 +34,20 @@ const MyBookings = () => {
             }
         } catch (error) {
             toast.error(error.message)
-            
         }
-        
     }
 
+    
     useEffect(()=>{
         if (user){
             fetchUserBookings()
+        }
+
+        const query = new URLSearchParams(window.location.search);
+        if (query.get('payment') === 'success') {
+            setTimeout(() => {
+                fetchUserBookings();
+            }, 2000);
         }
     },[user])
 
